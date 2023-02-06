@@ -1,17 +1,15 @@
 # name
-name: CI
+name: release
 
 # triggers
 on:
   workflow_dispatch:
   push:
-    branches: [ main, develop ]
+    tags: [ v* ]
     paths-ignore:
       - "**.md"
       - ".gitignore"
       - ".editorconfig"
-  pull_request:
-    branches: [ "develop" ]
 
 permissions:
   contents: read
