@@ -1,3 +1,17 @@
+# name
+name: check
+
+# triggers
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    paths-ignore:
+      - "**.md"
+      - ".gitignore"
+      - ".editorconfig"
+
 jobs:
   check:
     uses: cidverse/test/.github/workflows/reusable-check.yml@main
