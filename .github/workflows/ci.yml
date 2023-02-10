@@ -18,6 +18,7 @@ jobs:
     uses: cidverse/catalog/.github/workflows/shared-ci.yml@main
     with:
       cid-workflow: main
+      cid-version: latest
     secrets:
       QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
