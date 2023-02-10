@@ -8,13 +8,14 @@ on:
     branches:
       - 'main'
     paths-ignore:
-      - "**.md"
       - ".gitignore"
       - ".editorconfig"
 
 jobs:
   check:
     uses: cidverse/test/.github/workflows/reusable-check.yml@main
+    with:
+      cid-workflow: main
     secrets:
       QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

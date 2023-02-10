@@ -4,6 +4,10 @@ name: check
 # triggers
 on:
   workflow_call:
+    inputs:
+      cid-workflow:
+        required: true
+        type: string
     secrets:
       # qodana
       QODANA_TOKEN:
@@ -53,8 +57,10 @@ jobs:
         with:
           fetch-depth: 0
       - name: build
+        env:
+          CID_WORKFLOW: ${{ inputs.cid-workflow }}
         run: |
-          cid workflow run --stage build
+          cid workflow run "$CID_WORKFLOW" --stage build
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -74,8 +80,10 @@ jobs:
         with:
           fetch-depth: 0
       - name: test
+        env:
+          CID_WORKFLOW: ${{ inputs.cid-workflow }}
         run: |
-          cid workflow run --stage test
+          cid workflow run "$CID_WORKFLOW" --stage test
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -109,13 +117,14 @@ jobs:
         continue-on-error: true
       - name: scan
         env:
+          CID_WORKFLOW: ${{ inputs.cid-workflow }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         run: |
-          cid workflow run --stage scan
+          cid workflow run "$CID_WORKFLOW" --stage scan
   # package
   package:
     name: Package
@@ -135,8 +144,10 @@ jobs:
           path: .dist
         continue-on-error: true
       - name: package
+        env:
+          CID_WORKFLOW: ${{ inputs.cid-workflow }}
         run: |
-          cid workflow run --stage package
+          cid workflow run "$CID_WORKFLOW" --stage package
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -170,6 +181,7 @@ jobs:
         continue-on-error: true
       - name: publish
         env:
+          CID_WORKFLOW: ${{ inputs.cid-workflow }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cid workflow run --stage publish
+          cid workflow run "$CID_WORKFLOW" --stage publish
