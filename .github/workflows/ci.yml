@@ -12,6 +12,7 @@ on:
     paths-ignore:
       - ".gitignore"
       - ".editorconfig"
+  pull_request:
 
 jobs:
   check:
