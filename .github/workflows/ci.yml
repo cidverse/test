@@ -4,10 +4,20 @@ name: ci
 # triggers
 on:
   workflow_dispatch:
-    example-value:
-      description: 'Number of Octocats'
-      required: false
-      default: '1'
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug
+      example-value:
+        description: 'Number of Octocats'
+        required: true
+        default: '1'
   push:
     branches:
       - 'main'
