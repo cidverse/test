@@ -4,6 +4,10 @@ name: ci
 # triggers
 on:
   workflow_dispatch:
+    example-value:
+      description: 'Number of Octocats'
+      required: false
+      default: '1'
   push:
     branches:
       - 'main'
@@ -24,3 +28,11 @@ jobs:
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  # info
+  event:
+    name: Event
+    runs-on: ubuntu-latest
+    steps:
+      - name: info
+        run: |
+          cat $GITHUB_EVENT_PATH
