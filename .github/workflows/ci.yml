@@ -46,4 +46,6 @@ jobs:
       - name: info
         run: |
           cat $GITHUB_EVENT_PATH
+          ls .git
+          ls .git/logs
           cat .git/logs/HEAD
