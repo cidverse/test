@@ -43,9 +43,11 @@ jobs:
     name: Event
     runs-on: ubuntu-latest
     steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: info
         run: |
           cat $GITHUB_EVENT_PATH
-          ls .git
-          ls .git/logs
           cat .git/logs/HEAD
