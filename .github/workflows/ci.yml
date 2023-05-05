@@ -5,19 +5,16 @@ name: ci
 on:
   workflow_dispatch:
     inputs:
-      logLevel:
-        description: 'Log level'
+      loglevel:
+        description: Log level
         required: true
-        default: 'warning'
+        default: info
         type: choice
         options:
-        - info
-        - warning
         - debug
-      example-value:
-        description: 'Number of Octocats'
-        required: true
-        default: '1'
+        - info
+        - warn
+        - error
   push:
     branches:
       - 'main'
@@ -34,6 +31,7 @@ jobs:
     with:
       cid-workflow: main
       cid-version: latest
+      cid-loglevel: ${{ github.event.inputs.loglevel }}
     secrets:
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
