@@ -31,7 +31,7 @@ jobs:
     with:
       cid-workflow: main
       cid-version: latest
-      cid-loglevel: ${{ github.event.inputs.loglevel || "info" }}
+      cid-loglevel: ${{ github.event.inputs.loglevel }}
     secrets:
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
