@@ -17,13 +17,15 @@ on:
         - error
   push:
     branches:
-      - 'main'
+      - main
     tags:
       - 'v*.*.*'
     paths-ignore:
       - ".gitignore"
       - ".editorconfig"
   pull_request:
+    branches:
+      - main
 
 jobs:
   check:
