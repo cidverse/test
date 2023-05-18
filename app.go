@@ -5,6 +5,11 @@ import (
 	"net/http"
 )
 
+type User struct {
+	ID   int
+	Name string
+}
+
 // ...
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -15,4 +20,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	var user *User
+	fmt.Println(user.Name)
 }
