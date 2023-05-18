@@ -21,6 +21,7 @@ func main() {
 		panic(err)
 	}
 
+	// TODO: remove
 	var user *User
 	fmt.Println(user.Name)
 }
