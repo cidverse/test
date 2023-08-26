@@ -1,3 +1,5 @@
+# cid-workflow-version: 0.0.2
+
 # name
 name: ci
 
@@ -38,28 +40,304 @@ on:
       - .editorconfig
       - renovate.json
 
+# permissions, see https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions and https://docs.github.com/en/rest/overview/permissions-required-for-github-apps
+permissions:
+  actions: read # detection of GitHub Actions environment
+  checks: none
+  contents: read
+  deployments: none
+  id-token: none
+  issues: none
+  packages: none
+  pages: none
+  pull-requests: none
+  repository-projects: none
+  security-events: none
+  statuses: none
+
+# cancel in progress when a new run starts
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+env:
+  CID_WORKFLOW: main
+  CID_VERSION: 0.1.0
+  CID_LOGLEVEL: info
+  CID_TIMEOUT: 30
+  EGRESS_POLICY: block
+  EGRESS_ALLOWED_ENDPOINTS: |
+    api.github.com:443
+    github.com:443
+    objects.githubusercontent.com:443
+    raw.githubusercontent.com:443
+    quay.io:443
+    cdn01.quay.io:443
+    cdn02.quay.io:443
+    cdn03.quay.io:443
+    plugins.gradle.org:443
+    plugins-artifacts.gradle.org:443
+    services.gradle.org:443
+    downloads.gradle.org:443
+    repo.maven.apache.org:443
+    repo1.maven.org:443
+    jcenter.bintray.com:443
+    proxy.golang.org:443
+    storage.googleapis.com:443
+  EGRESS_ALLOWED_ENDPOINTS_BUILD: ""
+  EGRESS_ALLOWED_ENDPOINTS_TEST: ""
+  EGRESS_ALLOWED_ENDPOINTS_SCAN: |
+    scanner.sonarcloud.io:443
+    semgrep.dev:443
+    sonarcloud.io:443
+  EGRESS_ALLOWED_ENDPOINTS_PACKAGE: ""
+  EGRESS_ALLOWED_ENDPOINTS_PUBLISH: ""
+  ENV_PRODUCTION: production
+  ENV_DEVELOPMENT: development
+
+# jobs
 jobs:
-  check:
-    uses: cidverse/catalog/.github/workflows/shared-ci.yml@main
-    with:
-      cid-workflow: main
-      cid-version: latest
-      cid-loglevel: ${{ github.event.inputs.loglevel }}
-      egress-policy: block
-      egress-allowed-endpoints: >-
-        api.github.com:443
-        github.com:443
-        objects.githubusercontent.com:443
-        raw.githubusercontent.com:443
-        quay.io:443
-        cdn01.quay.io:443
-        cdn02.quay.io:443
-        cdn03.quay.io:443
-      egress-allowed-endpoints-scan: >-
-        scanner.sonarcloud.io:443
-        semgrep.dev:443
-        sonarcloud.io:443
-    secrets:
-      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  # info
+  info:
+    name: Info
+    runs-on: ubuntu-22.04 # https://github.com/actions/runner-images
+    timeout-minutes: ${{ fromJSON(inputs.cid-timeout) }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          disable-sudo: true
+          egress-policy: ${{ inputs.egress-policy }}
+          allowed-endpoints: >
+            ${{ inputs.egress-allowed-endpoints }}
+      - name: prepare environment
+        uses: cidverse/ghact-cid-setup@main
+        with:
+          version: ${{ inputs.cid-version }}
+      - name: checkout
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        with:
+          fetch-depth: 0
+      - name: info
+        env:
+          CID_LOGLEVEL: ${{ inputs.cid-loglevel }}
+        run: |
+          echo "> project modules"
+          cid --log-level=${CID_LOGLEVEL:-info} module ls
+          echo "> catalog"
+          cid --log-level=${CID_LOGLEVEL:-info} catalog list
+          echo "> workflows"
+          cid --log-level=${CID_LOGLEVEL:-info} workflow ls
+
+  # build
+  build:
+    name: Build
+    runs-on: ubuntu-22.04 # https://github.com/actions/runner-images
+    permissions:
+      id-token: write # provenance signing
+    timeout-minutes: ${{ fromJSON(inputs.cid-timeout) }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          disable-sudo: true
+          egress-policy: ${{ inputs.egress-policy }}
+          allowed-endpoints: ${{ inputs.egress-allowed-endpoints }} ${{ inputs.egress-allowed-endpoints-build }}
+      - name: prepare environment
+        uses: cidverse/ghact-cid-setup@main
+        with:
+          version: ${{ inputs.cid-version }}
+      - name: checkout
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        with:
+          fetch-depth: 0
+      - name: build
+        env:
+          CID_WORKFLOW: ${{ inputs.cid-workflow }}
+          CID_LOGLEVEL: ${{ inputs.cid-loglevel }}
+        run: |
+          cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage build
+      - name: upload artifacts
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        with:
+          name: build-${{ github.run_id }}
+          path: .dist
+          retention-days: 1
+          if-no-files-found: ignore
+      
+
+  # test
+  test:
+    name: Test
+    runs-on: ubuntu-22.04 # https://github.com/actions/runner-images
+    timeout-minutes: ${{ fromJSON(inputs.cid-timeout) }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          disable-sudo: true
+          egress-policy: ${{ inputs.egress-policy }}
+          allowed-endpoints: ${{ inputs.egress-allowed-endpoints }} ${{ inputs.egress-allowed-endpoints-test }}
+      - name: prepare environment
+        uses: cidverse/ghact-cid-setup@main
+        with:
+          version: ${{ inputs.cid-version }}
+      - name: checkout
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        with:
+          fetch-depth: 0
+      - name: test
+        env:
+          CID_WORKFLOW: ${{ inputs.cid-workflow }}
+          CID_LOGLEVEL: ${{ inputs.cid-loglevel }}
+        run: |
+          cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage test
+      - name: upload artifacts
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        with:
+          name: test-${{ github.run_id }}
+          path: .dist
+          retention-days: 1
+          if-no-files-found: ignore
+
+  # scan
+  scan:
+    name: Scan
+    runs-on: ubuntu-22.04 # https://github.com/actions/runner-images
+    needs: [build, test]
+    permissions:
+      security-events: write
+    timeout-minutes: ${{ fromJSON(inputs.cid-timeout) }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          disable-sudo: true
+          egress-policy: ${{ inputs.egress-policy }}
+          allowed-endpoints: ${{ inputs.egress-allowed-endpoints }} ${{ inputs.egress-allowed-endpoints-scan }}
+      - name: prepare environment
+        uses: cidverse/ghact-cid-setup@main
+        with:
+          version: ${{ inputs.cid-version }}
+      - name: checkout
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        with:
+          fetch-depth: 0
+      - name: download artifacts > build
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: build-${{ github.run_id }}
+          path: .dist
+        continue-on-error: true
+      - name: download artifacts > test
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: test-${{ github.run_id }}
+          path: .dist
+        continue-on-error: true
+      - name: scan
+        env:
+          CID_WORKFLOW: ${{ inputs.cid-workflow }}
+          CID_LOGLEVEL: ${{ inputs.cid-loglevel }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+        run: |
+          cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage scan
+
+  # package
+  package:
+    name: Package
+    runs-on: ubuntu-22.04 # https://github.com/actions/runner-images
+    needs: [build]
+    permissions:
+      id-token: write # provenance signing
+    timeout-minutes: ${{ fromJSON(inputs.cid-timeout) }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          disable-sudo: true
+          egress-policy: ${{ inputs.egress-policy }}
+          allowed-endpoints: ${{ inputs.egress-allowed-endpoints }} ${{ inputs.egress-allowed-endpoints-package }}
+      - name: prepare environment
+        uses: cidverse/ghact-cid-setup@main
+        with:
+          version: ${{ inputs.cid-version }}
+      - name: checkout
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        with:
+          fetch-depth: 0
+      - name: download artifacts > build
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: build-${{ github.run_id }}
+          path: .dist
+        continue-on-error: true
+      - name: package
+        env:
+          CID_WORKFLOW: ${{ inputs.cid-workflow }}
+          CID_LOGLEVEL: ${{ inputs.cid-loglevel }}
+        run: |
+          cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage package
+      - name: upload artifacts
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        with:
+          name: package-${{ github.run_id }}
+          path: .dist
+          retention-days: 1
+          if-no-files-found: ignore
+
+  # publish
+  publish:
+    name: Publish
+    runs-on: ubuntu-22.04 # https://github.com/actions/runner-images
+    needs: [package, scan]
+    permissions:
+      # create release
+      contents: write
+      # publish packages
+      packages: write
+    if: startsWith(github.ref, 'refs/pull/') == false
+    environment:
+      name: ${{ github.ref == 'refs/tags/v*' && inputs.env-production || inputs.env-development }}
+    timeout-minutes: ${{ fromJSON(inputs.cid-timeout) }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          disable-sudo: true
+          egress-policy: ${{ inputs.egress-policy }}
+          allowed-endpoints: >
+            ${{ inputs.egress-allowed-endpoints }} ${{ inputs.egress-allowed-endpoints-publish }}
+      - name: prepare environment
+        uses: cidverse/ghact-cid-setup@main
+        with:
+          version: ${{ inputs.cid-version }}
+      - name: checkout
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        with:
+          fetch-depth: 0
+      - name: download artifacts > package
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: package-${{ github.run_id }}
+          path: .dist
+        continue-on-error: true
+      - name: publish
+        env:
+          CID_WORKFLOW: ${{ inputs.cid-workflow }}
+          CID_LOGLEVEL: ${{ inputs.cid-loglevel }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_REPO_URL: ${{ secrets.MAVEN_REPO_URL }}
+          MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
+          MAVEN_REPO_PASSWORD: ${{ secrets.MAVEN_REPO_PASSWORD }}
+          MAVEN_GPG_SIGN_PRIVATEKEY: ${{ secrets.MAVEN_GPG_SIGN_PRIVATEKEY }}
+          MAVEN_GPG_SIGN_PASSWORD: ${{ secrets.MAVEN_GPG_SIGN_PASSWORD }}
+          MAVEN_GPG_SIGN_KEYID: ${{ secrets.MAVEN_GPG_SIGN_KEYID }}
+        run: |
+          cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage publish
+
+  
