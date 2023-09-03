@@ -84,8 +84,6 @@ env:
     sonarcloud.io:443
   EGRESS_ALLOWED_ENDPOINTS_PACKAGE: ""
   EGRESS_ALLOWED_ENDPOINTS_PUBLISH: ""
-  ENV_DEVELOPMENT: development
-  ENV_PRODUCTION: production
 
 # jobs
 jobs:
@@ -119,7 +117,6 @@ jobs:
           cid --log-level=${CID_LOGLEVEL:-info} catalog list
           echo "> workflows"
           cid --log-level=${CID_LOGLEVEL:-info} workflow ls
-
   # build
   build:
     name: Build
@@ -156,7 +153,6 @@ jobs:
           retention-days: 1
           if-no-files-found: ignore
       
-
   # test
   test:
     name: Test
@@ -190,7 +186,6 @@ jobs:
           path: .dist
           retention-days: 1
           if-no-files-found: ignore
-
   # scan
   scan:
     name: Scan
@@ -237,7 +232,6 @@ jobs:
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         run: |
           cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage scan
-
   # package
   package:
     name: Package
@@ -280,7 +274,6 @@ jobs:
           path: .dist
           retention-days: 1
           if-no-files-found: ignore
-
   # publish
   publish:
     name: Publish
@@ -293,7 +286,7 @@ jobs:
       packages: write
     if: startsWith(github.ref, 'refs/pull/') == false
     environment:
-      name: ${{ github.ref == 'refs/tags/v*' && env.ENV_PRODUCTION || env.ENV_DEVELOPMENT }}
+      name: ${{ github.ref == 'refs/tags/v*' && "production" || "development" }}
     timeout-minutes: 30
     steps:
       - name: Harden Runner
@@ -329,5 +322,3 @@ jobs:
           MAVEN_GPG_SIGN_KEYID: ${{ secrets.MAVEN_GPG_SIGN_KEYID }}
         run: |
           cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage publish
-
-  
