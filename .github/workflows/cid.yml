@@ -94,7 +94,7 @@ jobs:
   info:
     name: Info
     runs-on: ubuntu-22.04 # https://github.com/actions/runner-images
-    timeout-minutes: ${{ fromJSON(env.CID_TIMEOUT) }}
+    timeout-minutes: ${{ env.CID_TIMEOUT }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
@@ -127,7 +127,7 @@ jobs:
     runs-on: ubuntu-22.04 # https://github.com/actions/runner-images
     permissions:
       id-token: write # provenance signing
-    timeout-minutes: ${{ fromJSON(env.CID_TIMEOUT) }}
+    timeout-minutes: ${{ env.CID_TIMEOUT }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
@@ -162,7 +162,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-22.04 # https://github.com/actions/runner-images
-    timeout-minutes: ${{ fromJSON(env.CID_TIMEOUT) }}
+    timeout-minutes: ${{ env.CID_TIMEOUT }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
@@ -199,7 +199,7 @@ jobs:
     needs: [build, test]
     permissions:
       security-events: write
-    timeout-minutes: ${{ fromJSON(env.CID_TIMEOUT) }}
+    timeout-minutes: ${{ env.CID_TIMEOUT }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
@@ -246,7 +246,7 @@ jobs:
     needs: [build]
     permissions:
       id-token: write # provenance signing
-    timeout-minutes: ${{ fromJSON(env.CID_TIMEOUT) }}
+    timeout-minutes: ${{ env.CID_TIMEOUT }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
@@ -295,7 +295,7 @@ jobs:
     if: startsWith(github.ref, 'refs/pull/') == false
     environment:
       name: ${{ github.ref == 'refs/tags/v*' && env.ENV_PRODUCTION || env.ENV_DEVELOPMENT }}
-    timeout-minutes: ${{ fromJSON(env.CID_TIMEOUT) }}
+    timeout-minutes: ${{ env.CID_TIMEOUT }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
