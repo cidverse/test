@@ -285,8 +285,6 @@ jobs:
       # publish packages
       packages: write
     if: startsWith(github.ref, 'refs/pull/') == false
-    environment:
-      name: ${{ github.ref == 'refs/tags/v*' && "production" || "development" }}
     timeout-minutes: 30
     steps:
       - name: Harden Runner
