@@ -62,7 +62,7 @@ concurrency:
 
 env:
   CID_WORKFLOW: main
-  CID_VERSION: 0.1.0
+  CID_VERSION: latest
   CID_LOGLEVEL: info
   EGRESS_POLICY: block
   EGRESS_ALLOWED_ENDPOINTS: |
