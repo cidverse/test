@@ -29,16 +29,6 @@ on:
       - .gitignore
       - .editorconfig
       - renovate.json
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - README.md
-      - LICENSE
-      - .github/**
-      - .gitignore
-      - .editorconfig
-      - renovate.json
 
 # permissions, see https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions and https://docs.github.com/en/rest/overview/permissions-required-for-github-apps
 permissions:
@@ -63,7 +53,7 @@ concurrency:
 env:
   CID_WORKFLOW: main
   CID_VERSION: latest
-  CID_LOGLEVEL: info
+  CID_LOGLEVEL: ${{ github.event.inputs.loglevel || 'info' }}
   # allowed modes are 'block' and 'audit'. Using https://github.com/step-security/harden-runner to harden the runner.
   EGRESS_POLICY: block
   # allowed endpoints for egress traffic if egress-policy is set to 'block'.
@@ -94,6 +84,7 @@ jobs:
     name: Info
     runs-on: ubuntu-22.04 # https://github.com/actions/runner-images
     timeout-minutes: 30
+    if: ${{ github.event.inputs.loglevel == 'debug' }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
