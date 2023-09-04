@@ -1,7 +1,7 @@
 # cid-workflow-version: 0.0.5
 
 # name
-name: cid
+name: cid-main
 
 # triggers
 on:
