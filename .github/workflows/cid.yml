@@ -139,7 +139,7 @@ jobs:
         run: |
           cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage build
       - name: upload artifacts
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: build-${{ github.run_id }}
           path: .dist
@@ -173,7 +173,7 @@ jobs:
         run: |
           cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage test
       - name: upload artifacts
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: test-${{ github.run_id }}
           path: .dist
@@ -261,7 +261,7 @@ jobs:
         run: |
           cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage package
       - name: upload artifacts
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: package-${{ github.run_id }}
           path: .dist
