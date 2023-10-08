@@ -68,6 +68,7 @@ env:
     quay.io:443
     raw.githubusercontent.com:443
     storage.googleapis.com:443
+    uploads.github.com:443
   EGRESS_POLICY_ALLOWED_ENDPOINTS_BUILD: ""
   EGRESS_POLICY_ALLOWED_ENDPOINTS_TEST: ""
   EGRESS_POLICY_ALLOWED_ENDPOINTS_SCAN: >-
