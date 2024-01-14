@@ -1,4 +1,4 @@
-# cid-workflow-version: 0.0.8
+# cid-workflow-version: 0.0.9
 
 # name
 name: cid-main
@@ -140,7 +140,7 @@ jobs:
         run: |
           cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage build
       - name: upload artifacts
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
         with:
           name: build-${{ github.run_id }}
           path: .dist
@@ -174,7 +174,7 @@ jobs:
         run: |
           cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage test
       - name: upload artifacts
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
         with:
           name: test-${{ github.run_id }}
           path: .dist
@@ -204,13 +204,13 @@ jobs:
         with:
           fetch-depth: 0
       - name: download artifacts > build
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
           name: build-${{ github.run_id }}
           path: .dist
         continue-on-error: true
       - name: download artifacts > test
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
           name: test-${{ github.run_id }}
           path: .dist
@@ -250,7 +250,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: download artifacts > build
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
           name: build-${{ github.run_id }}
           path: .dist
@@ -262,7 +262,7 @@ jobs:
         run: |
           cid --log-level=${CID_LOGLEVEL:-info} workflow run "$CID_WORKFLOW" --stage package
       - name: upload artifacts
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
         with:
           name: package-${{ github.run_id }}
           path: .dist
@@ -296,7 +296,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: download artifacts > package
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
           name: package-${{ github.run_id }}
           path: .dist
