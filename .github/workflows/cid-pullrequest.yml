@@ -26,7 +26,6 @@ on:
     paths-ignore:
       - README.md
       - LICENSE
-      - .github/**
       - .gitignore
       - .editorconfig
       - renovate.json
