@@ -4,7 +4,7 @@
 # DO NOT EDIT!
 
 # name
-name: OSSF Scorecard
+name: CID - OSSF Scorecard
 on:
   # For Branch-Protection check. Only the default branch is supported. See
   # https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection
@@ -13,8 +13,8 @@ on:
   # https://github.com/ossf/scorecard/blob/main/docs/checks.md#maintained
   schedule:
     - cron: '40 23 * * 5'
-  push:
-    branches: [ 'main' ]
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
 
 # Read Permissions. See
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
