@@ -4,7 +4,7 @@
 # DO NOT EDIT!
 
 # name
-name: cid-pullrequest
+name: CID - PullRequest
 
 # triggers
 on:
@@ -207,13 +207,13 @@ jobs:
         with:
           fetch-depth: 0
       - name: download artifacts > build
-        uses: actions/download-artifact@9c19ed7fe5d278cd354c7dfd5d3b88589c7e2395 # v4.1.6
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           name: build-${{ github.run_id }}
           path: .dist
         continue-on-error: true
       - name: download artifacts > test
-        uses: actions/download-artifact@9c19ed7fe5d278cd354c7dfd5d3b88589c7e2395 # v4.1.6
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           name: test-${{ github.run_id }}
           path: .dist
