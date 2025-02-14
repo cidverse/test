@@ -54,7 +54,7 @@ concurrency:
 
 env:
   CID_WORKFLOW: main
-  CID_VERSION: latest
+  CID_VERSION: v0.4.1
   CID_LOGLEVEL: ${{ github.event.inputs.loglevel || 'info' }}
   # allowed modes are 'block' and 'audit'. Using https://github.com/step-security/harden-runner to harden the runner.
   EGRESS_POLICY: block
